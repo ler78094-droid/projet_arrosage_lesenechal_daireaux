@@ -1,0 +1,1670 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>WaterTech - Projet d'arrosage automatique</title>
+
+<link rel="icon" type="image/svg+xml"
+href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 8 C25 32 12 48 12 65 A38 38 0 0 0 88 65 C88 48 75 32 50 8Z' fill='%234f6f3a'/%3E%3Cpath d='M30 68 Q48 38 73 30 Q65 60 30 68Z' fill='%23b8d98b'/%3E%3C/svg%3E">
+
+<style>
+
+:root {
+  --green: #4f6f3a;
+  --green-dark: #354f2b;
+  --green-light: #718b4e;
+  --mint: #edf1df;
+  --ink: #303b2a;
+  --muted: #737b66;
+  --line: #dfe4d3;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  color: var(--ink);
+  background: #f5f4e9;
+  line-height: 1.6;
+}
+
+/* BARRE DU HAUT */
+
+.topbar {
+  height: 75px;
+  background: white;
+  display: flex;
+  align-items: center;
+  padding: 0 25px;
+  gap: 20px;
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.menu-button {
+  background: var(--green);
+  border: none;
+  color: white;
+  width: 45px;
+  height: 45px;
+  border-radius: 10px;
+  font-size: 25px;
+  cursor: pointer;
+}
+
+.logo {
+  font-size: 1.35rem;
+  font-weight: bold;
+  color: var(--green-dark);
+}
+
+/* MENU DÉROULANT */
+
+.menu {
+  position: fixed;
+  top: 75px;
+  left: 0;
+  width: 280px;
+  height: calc(100vh - 75px);
+  background: white;
+  box-shadow: 5px 8px 20px rgba(0,0,0,.12);
+  padding: 25px 18px;
+  z-index: 99;
+  transform: translateX(-110%);
+  transition: transform .3s ease;
+}
+
+.menu.open {
+  transform: translateX(0);
+}
+
+.menu-title {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--green-dark);
+  margin-bottom: 20px;
+}
+
+.menu button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  color: var(--ink);
+  padding: 14px;
+  margin-bottom: 7px;
+  border-radius: 9px;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.menu button:hover,
+.menu button.active {
+  background: var(--mint);
+  color: var(--green-dark);
+  font-weight: bold;
+}
+
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 75px 0 0;
+  background: rgba(0,0,0,.25);
+  z-index: 98;
+}
+
+.overlay.show {
+  display: block;
+}
+
+/* PAGES */
+
+.page {
+  display: none;
+  animation: appear .3s ease;
+}
+
+.page.active {
+  display: block;
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ACCUEIL */
+
+.home-hero {
+  background: linear-gradient(120deg, #354f2b, #718b4e);
+  color: white;
+  min-height: 520px;
+  display: flex;
+  align-items: center;
+  padding: 70px 8%;
+}
+
+.home-content {
+  max-width: 850px;
+  margin: auto;
+  width: 100%;
+}
+
+.home-content h1 {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  line-height: 1.15;
+  margin-bottom: 20px;
+}
+
+.home-content p {
+  font-size: 1.15rem;
+  max-width: 650px;
+  color: #e4f4eb;
+}
+
+.names {
+  margin-top: 35px;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.home-button {
+  display: inline-block;
+  margin-top: 25px;
+  padding: 13px 23px;
+  background: white;
+  color: var(--green-dark);
+  border-radius: 10px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.home-button:hover {
+  background: var(--mint);
+}
+
+/* CONTENU GÉNÉRAL */
+
+.container {
+  max-width: 1100px;
+  margin: auto;
+  padding: 45px 22px 70px;
+}
+
+.page-header {
+  background: linear-gradient(120deg, #354f2b, #718b4e);
+  color: white;
+  padding: 55px 7%;
+}
+
+.page-header h1 {
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  margin: 0;
+}
+
+.page-header p {
+  color: #e4f4eb;
+  max-width: 650px;
+}
+
+h2 {
+  font-size: 1.7rem;
+  color: var(--green-dark);
+}
+
+h3 {
+  color: var(--green-dark);
+}
+
+.card {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 25px;
+  box-shadow: 0 8px 24px rgba(24,65,44,.06);
+  margin-bottom: 20px;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: .93rem;
+}
+
+/* PRÉSENTATION */
+
+.intro-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.intro-icon {
+  font-size: 2rem;
+}
+
+.conteneur-image {
+  text-align: center;
+}
+
+/* IMAGE DU SYSTÈME */
+
+
+/* IMAGE DU SYSTÈME */
+
+.system-image {
+  width: 100%;
+  min-height: 300px;
+  max-height: 550px;
+  object-fit: contain;
+  border-radius: 12px;
+  background: #edf1df;
+  display: block;
+  margin-top: 20px;
+  cursor: default;
+  transform: none !important;
+}
+
+/* CONTENEUR DE L'IMAGE ET DE LA LOUPE */
+
+.image-zoom-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* BOUTON LOUPE */
+
+.zoom-button {
+  display: block;
+  margin: 10px 0 0 auto;
+  width: 42px;
+  height: 42px;
+  border: 1px solid #aab99a;
+  border-radius: 50%;
+  background: #f5f7ef;
+  color: var(--green-dark);
+  font-size: 21px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.zoom-button:hover,
+.zoom-button.active {
+  background: var(--green);
+  color: white;
+}
+
+/* LOUPE CIRCULAIRE */
+
+.zoom-lens {
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  border: 3px solid white;
+  border-radius: 50%;
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  display: none;
+  z-index: 20;
+  background-repeat: no-repeat;
+  overflow: hidden;
+}
+
+.zoom-lens.visible {
+  display: block;
+}
+
+
+.upload-area {
+  border: 2px dashed #aab99a;
+  border-radius: 15px;
+  padding: 45px 20px;
+  text-align: center;
+  background: #f8f9f2;
+  margin-top: 20px;
+}
+
+.upload-area label {
+  display: inline-block;
+  padding: 12px 20px;
+  background: var(--green);
+  color: white;
+  border-radius: 9px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.upload-area input {
+  display: none;
+}
+
+.upload-area p {
+  color: var(--muted);
+}
+
+/* SIMULATION */
+
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+/* Tablettes */
+@media (max-width: 1000px) {
+  .dashboard {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Téléphones */
+@media (max-width: 650px) {
+  .dashboard {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stat {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.stat-label {
+  color: var(--muted);
+}
+
+.moisture {
+  height: 13px;
+  border-radius: 20px;
+  background: #e8eadc;
+  overflow: hidden;
+  margin: 15px 0;
+}
+
+.moisture-fill {
+  height: 100%;
+  width: 58%;
+  background: #7d9b50;
+  transition: width .25s;
+}
+
+input[type=range] {
+  width: 100%;
+  accent-color: #718b4e;
+  margin: 14px 0;
+}
+
+button.action {
+  border: 0;
+  border-radius: 10px;
+  padding: 11px 16px;
+  font-weight: bold;
+  cursor: pointer;
+  background: var(--green);
+  color: white;
+}
+
+button.secondary {
+  background: var(--mint);
+  color: var(--green-dark);
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.status {
+  font-weight: bold;
+}
+
+.dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #7d9b50;
+  margin-right: 8px;
+}
+
+.dot.off {
+  background: #a5b0a9;
+}
+
+
+/* ANIMATION DE LA PLANTE ET DE L'ARROSAGE */
+
+.plant-animation {
+  background: #f8f9f2;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  padding: 15px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.plant-animation svg {
+  width: 100%;
+  max-width: 380px;
+  height: auto;
+  display: block;
+  margin: auto;
+}
+
+.water-jet {
+  fill: none;
+  stroke: #36a9e8;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-dasharray: 10 9;
+  opacity: 0;
+}
+
+.plant-animation.watering .water-jet {
+  opacity: 1;
+  animation: waterFlow 0.45s linear infinite;
+}
+
+.water-drop {
+  fill: #36a9e8;
+  opacity: 0;
+}
+
+.plant-animation.watering .water-drop {
+  opacity: 1;
+  animation: dropFall 0.8s ease-in infinite;
+}
+
+@keyframes waterFlow {
+  to {
+    stroke-dashoffset: -38;
+  }
+}
+
+@keyframes dropFall {
+  0% {
+    transform: translateY(-8px);
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+}
+
+.plant-status {
+  font-weight: bold;
+  color: var(--green-dark);
+  margin-top: 5px;
+}
+
+.plant-animation.watering .plant-status {
+  color: #238ac1;
+}
+
+
+/* ÉCRAN LCD */
+
+.lcd {
+  background: #263b2c;
+  color: #a8f58b;
+  border: 5px solid #89947d;
+  border-radius: 12px;
+  padding: 20px;
+  font-family: monospace;
+  text-align: center;
+  box-shadow: inset 0 0 12px rgba(0,0,0,.5);
+  margin: 15px 0;
+}
+
+.lcd-title {
+  font-size: 14px;
+  color: #d2e9c4;
+}
+
+.lcd-value {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin: 10px;
+}
+
+/* RÉSERVOIR */
+
+.tank {
+  width: 110px;
+  height: 175px;
+  border: 4px solid #718b4e;
+  border-radius: 12px 12px 18px 18px;
+  margin: 15px auto;
+  position: relative;
+  overflow: hidden;
+  background: #edf1df;
+}
+
+.tank-water {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 75%;
+  background: #55a9d8;
+  transition: height .3s;
+}
+
+.tank-info {
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.tank-status {
+  text-align: center;
+  color: var(--muted);
+  font-size: .9rem;
+}
+
+.sensor-indicator {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #7d9b50;
+  margin-right: 6px;
+}
+
+.sensor-indicator.warning {
+  background: #d69b35;
+}
+
+.sensor-indicator.off {
+  background: #c34c43;
+}
+
+/* FOOTER */
+
+footer {
+  text-align: center;
+  color: var(--muted);
+  padding: 28px;
+  border-top: 1px solid var(--line);
+  background: white;
+}
+
+/* TÉLÉPHONE */
+
+@media(max-width:760px) {
+
+  .intro-grid,
+  .dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .home-hero {
+    min-height: 450px;
+    padding: 45px 7%;
+  }
+
+  .topbar {
+    padding: 0 15px;
+  }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- BARRE DU HAUT -->
+
+<div class="topbar">
+
+  <button class="menu-button" id="menuButton"
+  aria-label="Ouvrir le menu"
+  aria-expanded="false">☰</button>
+
+  <div class="logo">🌿 WaterTech</div>
+
+</div>
+
+<!-- MENU LATÉRAL -->
+
+<div class="menu" id="menu">
+
+  <div class="menu-title">MENU PRINCIPAL</div>
+
+  <button class="active" data-page="accueil">
+    🏠 Accueil
+  </button>
+
+  <button data-page="quatre-systemes">
+    💧 Présentation de quatre systèmes d'arrosage existants
+  </button>
+
+  <button data-page="presentation">
+    🌱 Présentation du projet
+  </button>
+
+  <button data-page="systeme">
+    💧 Notre système
+  </button>
+
+  <button data-page="simulation">
+    ⚙️ Simulation
+  </button>
+
+</div>
+
+<div class="overlay" id="overlay"></div>
+
+
+<!-- ================================= -->
+<!-- PAGE 1 : ACCUEIL -->
+<!-- ================================= -->
+
+<div class="page active" id="accueil">
+
+  <div class="home-hero">
+
+    <div class="home-content">
+
+      <h1>Bienvenue sur WaterTech 💧</h1>
+
+      <p>
+        Découvrez notre projet d'arrosage automatique.
+        Un système intelligent qui surveille l'humidité de la terre
+        et permet d'arroser les plantes au bon moment.
+      </p>
+
+      <div class="names">
+        Un projet réalisé par :<br>
+        DAIREAUX Kilian & LESENECHAL Raphaël
+      </div>
+
+      <button class="home-button"
+      onclick="showPage('presentation')">
+        Découvrir notre projet →
+      </button>
+
+    </div>
+
+  </div>
+
+  <div class="container">
+
+    <h2>Notre objectif</h2>
+
+    <div class="card">
+
+      <p>
+        Nous avons pour objectif de concevoir une maquette
+        d'un système d'arrosage automatique.
+      </p>
+
+      <p>
+        Ce dispositif doit être capable de détecter lorsque
+        la terre devient trop sèche et de déclencher
+        automatiquement l'arrosage.
+      </p>
+
+      <p>
+        Nous allons coder une carte arduino pour faire fonctionner ce système
+      </p>
+
+      <p class="muted">
+        Découvrez les différentes parties de notre projet
+        grâce au menu situé en haut à gauche.
+      </p>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ================================= -->
+<!-- PAGE 2 : PRÉSENTATION DU PROJET -->
+<!-- ================================= -->
+
+<div class="page" id="presentation">
+
+  <div class="page-header">
+
+    <h1>Présentation du projet</h1>
+
+    <p>
+      Un projet miniature pour rendre l'arrosage
+      plus intelligent et économiser l'eau.
+    </p>
+
+  </div>
+
+  <div class="container">
+
+    <div class="card">
+
+      <h2>💧 En quoi consiste notre projet ?</h2>
+
+      <p>
+        Notre projet consiste à réaliser une maquette
+        d'un système d'arrosage automatique.
+        Le but est de reproduire, à petite échelle,
+        le fonctionnement d'une véritable installation
+        d'arrosage.
+      </p>
+
+      <p>
+        Le système utilise un capteur d'humidité pour
+        connaître l'état de la terre. Lorsque celle-ci
+        devient trop sèche, une carte programmable
+        commande une pompe afin d'apporter de l'eau
+        aux plantes.
+      </p>
+
+      <p>
+        Un réservoir permet de stocker l'eau nécessaire
+        à l'arrosage. Un détecteur surveille également
+        son niveau pour éviter que la pompe fonctionne
+        lorsque le réservoir est vide.
+      </p>
+
+      <p>
+        N'hésiter pas à aller tester dans la rubrique "Simulation"
+      </p>
+
+    </div>
+
+    <h2>Les objectifs du projet</h2>
+
+    <div class="intro-grid">
+
+      <article class="card">
+        <div class="intro-icon">🌱</div>
+        <h3>Prendre soin des plantes</h3>
+        <p class="muted">
+          Apporter de l'eau lorsque les plantes en ont besoin.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="intro-icon">💧</div>
+        <h3>Économiser l'eau</h3>
+        <p class="muted">
+          Éviter les arrosages inutiles en surveillant
+          l'humidité du sol.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="intro-icon">⚙️</div>
+        <h3>Automatiser l'arrosage</h3>
+        <p class="muted">
+          Déclencher la pompe automatiquement
+          lorsque cela est nécessaire.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="intro-icon">🔎</div>
+        <h3>Surveiller le réservoir</h3>
+        <p class="muted">
+          Contrôler la quantité d'eau disponible
+          pour assurer le bon fonctionnement du système.
+        </p>
+      </article>
+
+    </div>
+
+    <h2>Les principaux composants</h2>
+
+    <div class="card">
+
+      <ul>
+        <li>Une carte Arduino ou ESP32.</li>
+        <li>Un capteur d'humidité du sol.</li>
+        <li>Une pompe à eau.</li>
+        <li>Un réservoir d'eau.</li>
+        <li>Un détecteur de niveau d'eau.</li>
+        <li>Un écran LCD.</li>
+        <li>Des tuyaux pour distribuer l'eau.</li>
+      </ul>
+
+    </div>
+
+    <h2>Le schéma des composants</h2>
+
+    <div class="card">
+
+      <div class="conteneur-image">
+
+        <img src="C:\Users\ordi2510446\OneDrive\Documents\Cours Lycée Curie-Corot\IT\Projet IT\Image/photo.png"
+        class="system-image"
+		alt="---"
+        width="900"
+        height="600">
+
+        <h3>La carte ne correspond pas à celle que l'on va se servir</h3>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ================================= -->
+<!-- PAGE : QUATRE SYSTÈMES D'ARROSAGE -->
+<!-- ================================= -->
+
+<div class="page" id="quatre-systemes">
+
+  <div class="page-header">
+
+    <h1>Présentation de quatre systèmes d'arrosage existants</h1>
+
+    <p>
+      Découvrez quatre systèmes d'arrosage déjà utilisés dans le monde.
+    </p>
+
+  </div>
+
+  <div class="container">
+
+    <div class="card">
+
+      <h2>La carte mentale des 4 systèmes arrosages existants</h2>
+	  
+	  <img src="C:\Users\ordi2510446\OneDrive\Documents\Cours Lycée Curie-Corot\IT\Projet IT\Image/Solution d'arrosage automatique existant.png"
+        class="system-image"
+        alt="---"
+		width="1000"
+        height="500">
+
+        <h3>Les 4 systèmes d'arrosages</h3>
+
+    </div>
+  </div>
+
+</div>
+
+
+
+<!-- ================================= -->
+<!-- PAGE 3 : PRÉSENTATION DU SYSTÈME -->
+<!-- ================================= -->
+
+<div class="page" id="systeme">
+
+  <div class="page-header">
+
+    <h1>Notre système d'arrosage</h1>
+
+    <p>
+      Découvrez la maquette et les différents éléments
+      qui composent notre installation.
+    </p>
+
+  </div>
+
+  <div class="container">
+
+    <div class="card">
+
+      <h2>📷 Présentation de notre installation</h2>
+
+      <p>
+        Retrouvez ici une photographie de notre système
+        d'arrosage automatique miniature.
+      </p>
+
+    </div>
+
+    <div class="card">
+
+      <h2>⚙️ Fonctionnement général</h2>
+
+      <p>
+        Le capteur mesure l'humidité du sol.
+        La carte programmable analyse cette mesure
+        et décide si un arrosage est nécessaire.
+      </p>
+
+      <p>
+        Si le sol est trop sec et que le réservoir
+        contient suffisamment d'eau, la pompe démarre
+        et envoie l'eau vers les plantes.
+      </p>
+
+      <p>
+        L'écran LCD permet de consulter les informations
+        importantes du système.
+      </p>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ================================= -->
+<!-- PAGE 4 : SIMULATION -->
+<!-- ================================= -->
+
+<div class="page" id="simulation">
+
+  <div class="page-header">
+
+    <h1>Simulation du système</h1>
+
+    <p>
+      Testez le fonctionnement de notre arrosage
+      automatique en modifiant les différents paramètres.
+    </p>
+
+  </div>
+
+  <div class="container">
+
+    <div class="dashboard">
+
+      <!-- HUMIDITÉ -->
+
+      <article class="card">
+
+        <div class="stat-label">
+          🌱 Humidité du sol simulée
+        </div>
+
+        <div class="stat">
+          <span id="moistureValue">58</span> %
+        </div>
+
+        <div class="moisture">
+          <div class="moisture-fill"
+          id="moistureFill"></div>
+        </div>
+
+        <label for="moistureRange" class="muted">
+          Modifier l'humidité :
+        </label>
+
+        <input
+          id="moistureRange"
+          type="range"
+          min="0"
+          max="100"
+          value="58"
+        >
+
+        <div class="muted" id="soilMessage">
+          La terre est suffisamment humide.
+        </div>
+
+      </article>
+
+
+      <!-- POMPE -->
+
+      <article class="card">
+
+        <div class="stat-label">
+          ⚙️ État de l'arrosage
+        </div>
+
+        <p class="status">
+
+          <span class="dot off"
+          id="statusDot"></span>
+
+          <span id="pumpStatus">
+            Pompe arrêtée
+          </span>
+
+        </p>
+
+        <p class="muted" id="modeText">
+          Mode automatique : la pompe démarre sous 35 %.
+        </p>
+
+        <div class="controls">
+
+          <button class="action" id="autoButton">
+            Mode automatique
+          </button>
+
+          <button class="action secondary"
+          id="manualButton">
+            Tester la pompe
+          </button>
+
+        </div>
+
+        <p class="muted">
+          Simulation uniquement : cette page ne commande
+          pas une vraie pompe.
+        </p>
+
+      </article>
+
+
+<!-- ANIMATION DE L'ARROSAGE -->
+
+<article class="card">
+
+  <h3>🌱 Arrosage de la plante en direct</h3>
+
+  <div class="plant-animation" id="plantAnimation">
+
+    <svg viewBox="0 0 420 220"
+         xmlns="http://www.w3.org/2000/svg">
+
+      <!-- SOL -->
+      <path d="M25 180 Q210 165 395 180"
+            fill="none"
+            stroke="#9b754b"
+            stroke-width="5"
+            stroke-linecap="round"/>
+
+      <!-- POT -->
+      <path d="M145 145 L275 145 L260 205 L160 205 Z"
+            fill="#c77b4d"
+            stroke="#965533"
+            stroke-width="3"/>
+
+      <path d="M140 143 L280 143"
+            stroke="#965533"
+            stroke-width="8"
+            stroke-linecap="round"/>
+
+      <!-- TERRE -->
+      <ellipse cx="210" cy="145" rx="67" ry="10"
+               fill="#654b35"/>
+
+      <!-- TIGE -->
+      <path d="M210 145 Q205 100 210 65"
+            stroke="#4f873c"
+            stroke-width="7"
+            fill="none"
+            stroke-linecap="round"/>
+
+      <!-- FEUILLES -->
+      <path d="M207 112 Q145 105 155 65
+               Q195 63 207 112"
+            fill="#69a84f"
+            stroke="#477b37"
+            stroke-width="2"/>
+
+      <path d="M211 95 Q275 85 270 48
+               Q230 43 211 95"
+            fill="#83bd5e"
+            stroke="#477b37"
+            stroke-width="2"/>
+
+      <path d="M208 70 Q170 30 195 15
+               Q225 25 208 70"
+            fill="#6fae4e"
+            stroke="#477b37"
+            stroke-width="2"/>
+
+      <!-- TUYAU D'ARROSAGE -->
+      <path d="M30 55 L75 55 Q90 55 90 70
+               L90 100 Q90 115 105 115
+               L115 115"
+            fill="none"
+            stroke="#687d63"
+            stroke-width="12"
+            stroke-linecap="round"/>
+
+      <!-- EMBOUT -->
+      <path d="M105 107 L125 107 L125 123 L105 123 Z"
+            fill="#718b4e"/>
+
+      <!-- JET D'EAU ANIMÉ -->
+      <path class="water-jet"
+            d="M125 115 Q160 120 195 143"/>
+
+      <!-- GOUTTES -->
+      <circle class="water-drop" cx="155" cy="125" r="4"/>
+      <circle class="water-drop" cx="175" cy="135" r="3"/>
+      <circle class="water-drop" cx="190" cy="143" r="4"/>
+
+    </svg>
+
+    <div class="plant-status" id="plantStatus">
+      Pompe arrêtée – Pas d'arrosage
+    </div>
+
+  </div>
+
+</article>
+
+
+      <!-- ÉCRAN LCD -->
+
+      <article class="card">
+
+        <h3>📟 Écran LCD</h3>
+
+        <div class="lcd">
+
+          <div class="lcd-title">
+            WATERTECH
+          </div>
+
+          <div class="lcd-value">
+            <span id="lcdHumidity">58</span>%
+          </div>
+
+          <div id="lcdMessage">
+            SOL HUMIDE
+          </div>
+
+          <hr style="border-color: #a8f58b;">
+
+          <div id="lcdWater">
+            EAU : PARFAIT
+          </div>
+
+        </div>
+
+        <p class="muted">
+          L'écran affiche en temps réel le taux d'humidité
+          mesuré par le capteur.
+        </p>
+
+      </article>
+
+
+      <!-- RÉSERVOIR -->
+
+      <article class="card">
+
+        <h3>💧 Réservoir d'eau</h3>
+
+        <div class="tank">
+
+          <div class="tank-water"
+          id="tankWater"></div>
+
+        </div>
+
+        <div class="tank-info">
+          <span id="tankValue">75</span> %
+        </div>
+
+        <div class="tank-status" id="tankMessage">
+          Niveau d'eau élevé
+        </div>
+
+        <p class="muted" style="margin-top:18px;">
+
+          <span class="sensor-indicator"
+          id="tankSensor"></span>
+
+          <strong id="sensorText">
+            Détecteur : niveau correct
+          </strong>
+
+        </p>
+
+        <label for="tankRange" class="muted">
+          Modifier le niveau du réservoir :
+        </label>
+
+        <input
+          id="tankRange"
+          type="range"
+          min="0"
+          max="100"
+          value="75"
+        >
+
+        <p class="muted">
+          Le détecteur surveille le niveau d'eau
+          pour empêcher le fonctionnement de la pompe
+          lorsque le réservoir est vide.
+        </p>
+
+      </article>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- PIED DE PAGE -->
+
+<footer>
+  Projet d'arrosage automatique · WaterTech 💧
+</footer>
+
+
+<script>
+
+/* =================================
+   NAVIGATION ENTRE LES PAGES
+================================= */
+
+const menuButton = document.getElementById('menuButton');
+const menu = document.getElementById('menu');
+const overlay = document.getElementById('overlay');
+
+function openMenu() {
+  menu.classList.add('open');
+  overlay.classList.add('show');
+  menuButton.setAttribute('aria-expanded', 'true');
+}
+
+function closeMenu() {
+  menu.classList.remove('open');
+  overlay.classList.remove('show');
+  menuButton.setAttribute('aria-expanded', 'false');
+}
+
+menuButton.addEventListener('click', () => {
+
+  if (menu.classList.contains('open')) {
+    closeMenu();
+  } else {
+    openMenu();
+  }
+
+});
+
+overlay.addEventListener('click', closeMenu);
+
+
+function showPage(pageId) {
+
+  // Masquer toutes les pages
+
+  document.querySelectorAll('.page').forEach(page => {
+    page.classList.remove('active');
+  });
+
+  // Afficher la page demandée
+
+  document.getElementById(pageId).classList.add('active');
+
+  // Mettre à jour le menu
+
+  document.querySelectorAll('.menu button').forEach(button => {
+
+    button.classList.toggle(
+      'active',
+      button.dataset.page === pageId
+    );
+
+  });
+
+  closeMenu();
+
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+
+}
+
+
+// Navigation avec les boutons du menu
+
+document.querySelectorAll('.menu button').forEach(button => {
+
+  button.addEventListener('click', () => {
+    showPage(button.dataset.page);
+  });
+
+});
+
+
+/* =================================
+   SIMULATION D'ARROSAGE
+================================= */
+
+// Humidité
+
+const range = document.getElementById('moistureRange');
+const value = document.getElementById('moistureValue');
+const fill = document.getElementById('moistureFill');
+const soilMessage = document.getElementById('soilMessage');
+
+// Pompe
+
+const pumpStatus = document.getElementById('pumpStatus');
+const dot = document.getElementById('statusDot');
+const modeText = document.getElementById('modeText');
+
+// Écran LCD
+
+const lcdHumidity = document.getElementById('lcdHumidity');
+const lcdMessage = document.getElementById('lcdMessage');
+const lcdWater = document.getElementById('lcdWater');
+
+// Réservoir
+
+const tankRange = document.getElementById('tankRange');
+const tankWater = document.getElementById('tankWater');
+const tankValue = document.getElementById('tankValue');
+const tankMessage = document.getElementById('tankMessage');
+const tankSensor = document.getElementById('tankSensor');
+const sensorText = document.getElementById('sensorText');
+
+let automatic = true;
+let manualPump = false;
+
+
+function update() {
+
+  const humidity = Number(range.value);
+  const water = Number(tankRange.value);
+
+
+  // HUMIDITÉ DU SOL
+
+  value.textContent = humidity;
+  fill.style.width = humidity + '%';
+
+  if (humidity < 35) {
+
+    soilMessage.textContent =
+      'La terre est sèche : un arrosage est nécessaire.';
+
+  } else if (humidity < 60) {
+
+    soilMessage.textContent =
+      'L’humidité est moyenne.';
+
+  } else {
+
+    soilMessage.textContent =
+      'La terre est suffisamment humide.';
+
+  }
+
+
+  // ÉCRAN LCD
+
+  lcdHumidity.textContent = humidity;
+
+  if (humidity < 35) {
+
+    lcdMessage.textContent = 'SOL SEC - ARROSAGE';
+
+  } else if (humidity < 60) {
+
+    lcdMessage.textContent = 'HUMIDITE MOYENNE';
+
+  } else {
+
+    lcdMessage.textContent = 'SOL HUMIDE';
+
+  }
+
+
+  // NIVEAU DU RÉSERVOIR
+
+  tankValue.textContent = water;
+  tankWater.style.height = water + '%';
+
+  // AFFICHAGE DU NIVEAU D'EAU SUR LE LCD
+
+  if (water < 20) {
+
+    lcdWater.textContent = 'EAU : MAUVAIS';
+
+  } else if (water <= 50) {
+
+    lcdWater.textContent = 'EAU : BIEN';
+
+  } else {
+
+    lcdWater.textContent = 'EAU : PARFAIT';
+
+  }
+
+
+  if (water === 0) {
+
+    tankMessage.textContent = 'Réservoir vide !';
+
+    tankSensor.className =
+      'sensor-indicator off';
+
+    sensorText.textContent =
+      'Détecteur : réservoir vide';
+
+  } else if (water < 25) {
+
+    tankMessage.textContent = 'Niveau d’eau faible';
+
+    tankSensor.className =
+      'sensor-indicator warning';
+
+    sensorText.textContent =
+      'Détecteur : niveau faible';
+
+  } else if (water < 60) {
+
+    tankMessage.textContent = 'Niveau d’eau moyen';
+
+    tankSensor.className =
+      'sensor-indicator warning';
+
+    sensorText.textContent =
+      'Détecteur : niveau moyen';
+
+  } else {
+
+    tankMessage.textContent = 'Niveau d’eau élevé';
+
+    tankSensor.className =
+      'sensor-indicator';
+
+    sensorText.textContent =
+      'Détecteur : niveau correct';
+
+  }
+
+
+  // GESTION DE LA POMPE
+
+  const requested = automatic
+    ? humidity < 35
+    : manualPump;
+
+  const running = requested && water > 0;
+
+  pumpStatus.textContent = running
+    ? 'Pompe en fonctionnement (simulation)'
+    : 'Pompe arrêtée';
+
+  dot.classList.toggle('off', !running);
+  
+  
+  // ANIMATION DE LA PLANTE
+
+  const plantAnimation = document.getElementById('plantAnimation');
+  const plantStatus = document.getElementById('plantStatus');
+
+  plantAnimation.classList.toggle('watering', running);
+
+  plantStatus.textContent = running
+  ? '💧 Arrosage en cours...'
+  : '🌱 Pompe arrêtée – Pas d’arrosage';
+
+
+  if (water === 0 && requested) {
+
+    modeText.textContent =
+      'Réservoir vide : impossible de démarrer la pompe.';
+
+  } else {
+
+    modeText.textContent = automatic
+      ? 'Mode automatique : la pompe démarre sous 35 %.'
+      : 'Mode manuel : utilise le bouton pour démarrer ou arrêter.';
+
+  }
+
+}
+
+
+// MODIFICATION DE L'HUMIDITÉ
+
+range.addEventListener('input', update);
+
+
+// MODIFICATION DU NIVEAU D'EAU
+
+tankRange.addEventListener('input', update);
+
+
+// MODE AUTOMATIQUE
+
+document.getElementById('autoButton')
+.addEventListener('click', () => {
+
+  automatic = true;
+  manualPump = false;
+
+  update();
+
+});
+
+
+// MODE MANUEL
+
+document.getElementById('manualButton')
+.addEventListener('click', () => {
+
+  automatic = false;
+  manualPump = !manualPump;
+
+  update();
+
+});
+
+
+// INITIALISATION
+
+update();
+
+/* =================================
+   LOUPE CIRCULAIRE SUR LES IMAGES
+================================= */
+
+document.querySelectorAll('.system-image').forEach(img => {
+
+  // Créer le conteneur
+  const wrapper = document.createElement('div');
+  wrapper.className = 'image-zoom-wrapper';
+
+  img.parentNode.insertBefore(wrapper, img);
+  wrapper.appendChild(img);
+
+  // Créer le bouton
+  const button = document.createElement('button');
+  button.className = 'zoom-button';
+  button.type = 'button';
+  button.textContent = '🔍';
+  button.title = 'Activer ou désactiver la loupe';
+  button.setAttribute('aria-pressed', 'false');
+
+  wrapper.appendChild(button);
+
+  // Créer la loupe
+  const lens = document.createElement('div');
+  lens.className = 'zoom-lens';
+  wrapper.appendChild(lens);
+
+  let zoomEnabled = false;
+  const zoom = 2.5;
+
+  // Activer / désactiver
+  button.addEventListener('click', () => {
+
+    zoomEnabled = !zoomEnabled;
+
+    button.classList.toggle('active', zoomEnabled);
+    button.setAttribute('aria-pressed', zoomEnabled);
+
+    if (!zoomEnabled) {
+      lens.classList.remove('visible');
+    }
+
+  });
+
+  // Déplacement de la loupe
+  img.addEventListener('mousemove', event => {
+
+    if (!zoomEnabled) return;
+
+    const rect = img.getBoundingClientRect();
+
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    const lensSize = 150;
+
+    // Position du cercle
+    lens.style.left =
+      (img.offsetLeft + x - lensSize / 2) + 'px';
+
+    lens.style.top =
+      (img.offsetTop + y - lensSize / 2) + 'px';
+
+    // Image agrandie dans le cercle
+    lens.style.backgroundImage =
+      `url("${img.currentSrc || img.src}")`;
+
+    lens.style.backgroundSize =
+      `${rect.width * zoom}px ${rect.height * zoom}px`;
+
+    lens.style.backgroundPosition =
+      `${-(x * zoom - lensSize / 2)}px ${-(y * zoom - lensSize / 2)}px`;
+
+    lens.classList.add('visible');
+
+  });
+
+  // Cacher la loupe quand la souris quitte l'image
+  img.addEventListener('mouseleave', () => {
+    lens.classList.remove('visible');
+  });
+
+});
+
+</script>
+
+</body>
+</html>
